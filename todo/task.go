@@ -5,7 +5,7 @@ import "time"
 type Task struct {
 	Title       string
 	Description string
-	IsDone      bool
+	Completed     bool
 
 	CreatedAt time.Time
 	DoneAt    *time.Time
@@ -15,15 +15,15 @@ func NewTast(title string, description string) Task {
 	return Task{
 		Title:       title,
 		Description: description,
-		IsDone:      false,
+		Completed:      false,
 		CreatedAt:   time.Now(),
 		DoneAt:      nil,
 	}
 }
 
 func (t *Task) Done() {
-	doneTime := time.Now()
+	completeTime := time.Now()
 
-	t.IsDone = true
-	t.DoneAt = &doneTime
+	t.Completed = true
+	t.DoneAt = &completeTime
 }
