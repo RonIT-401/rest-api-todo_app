@@ -8,7 +8,7 @@ type Task struct {
 	Completed     bool
 
 	CreatedAt time.Time
-	DoneAt    *time.Time
+	CompletedAt    *time.Time
 }
 
 func NewTask(title string, description string) Task {
@@ -17,7 +17,7 @@ func NewTask(title string, description string) Task {
 		Description: description,
 		Completed:      false,
 		CreatedAt:   time.Now(),
-		DoneAt:      nil,
+		CompletedAt:      nil,
 	}
 }
 
@@ -25,5 +25,10 @@ func (t *Task) Done() {
 	completeTime := time.Now()
 
 	t.Completed = true
-	t.DoneAt = &completeTime
+	t.CompletedAt = &completeTime
+}
+
+func (t *Task) Uncomlete() {
+	t.Completed = false
+	t.CompletedAt = nil
 }

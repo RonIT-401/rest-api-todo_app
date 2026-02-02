@@ -1,7 +1,10 @@
 package todo
 
+import "sync"
+
 type List struct {
 	tasks map[string]Task
+	mtx   sync.RWMutex
 }
 
 // Конструктор листа. Инициализируем мапу
@@ -13,6 +16,9 @@ func NewList() *List {
 
 // Добавление задачи по ключу
 func (l *List) AddTask(task Task) error {
+	l.mtx.Lock()
+	defer l.mtx.Unlock()
+
 	_, ok := l.tasks[task.Title]
 	if !ok {
 		return ErrTaskAlreadyExist
@@ -23,8 +29,23 @@ func (l *List) AddTask(task Task) error {
 	return nil
 }
 
+func (l *List) GetTask(title string) (Task, error) {
+	l.mtx.RLock()
+	defer l.mtx.RUnlock()
+
+	task, ok := l.tasks[title]
+	if !ok {
+		return Task{}, ErrTaskNotFound
+	}
+
+	return task, nil
+}
+
 // Метод отображения всех задач через временную переменную для ограничения доступа к оригинальному листу
 func (l *List) ListTasks() map[string]Task {
+	l.mtx.RLock()
+	defer l.mtx.RUnlock()
+
 	tmp := make(map[string]Task, len(l.tasks))
 
 	for k, v := range l.tasks {
@@ -36,6 +57,9 @@ func (l *List) ListTasks() map[string]Task {
 
 // Метод завершения задачи с проверкой на существования этой задачи
 func (l *List) CompleteTask(title string) error {
+	l.mtx.Lock()
+	defer l.mtx.Unlock()
+
 	task, ok := l.tasks[title]
 	if !ok {
 		return ErrTaskNotFound
@@ -48,21 +72,43 @@ func (l *List) CompleteTask(title string) error {
 	return nil
 }
 
+func (l *List) UncomleteTask(title string) error {
+	l.mtx.Lock()
+	defer l.mtx.Unlock()
+	
+	task, ok := l.tasks[title]
+	if !ok {
+		return ErrTaskNotFound
+	}
+
+	task.Uncomlete()
+
+	l.tasks[title] = task
+
+	return nil
+}
+
 // Метод отображения не завершенных задач
-func (l *List) ListNotComletedTasks() map[string]Task{
-	notCompletedTask := make(map[string]Task)
+func (l *List) ListUncomletedTasks() map[string]Task {
+	l.mtx.RLock()
+	defer l.mtx.RUnlock()
+	
+	uncompletedTask := make(map[string]Task)
 
 	for title, task := range l.tasks {
 		if !task.Completed {
-			notCompletedTask[title] = task
+			uncompletedTask[title] = task
 		}
 	}
 
-	return notCompletedTask
+	return uncompletedTask
 }
 
 // Метод удаления задачи
 func (l *List) DeleteTask(title string) error {
+	l.mtx.Lock()
+	defer l.mtx.Unlock()
+
 	_, ok := l.tasks[title]
 	if !ok {
 		return ErrTaskNotFound
