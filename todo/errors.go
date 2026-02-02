@@ -3,4 +3,4 @@ package todo
 import "errors"
 
 var ErrTaskNotFound = errors.New("Task not found")
-var ErrTaskAlreadyExist = errors.New("TaslAlreadyExist")
+var ErrTaskAlreadyExist = errors.New("TaskAlreadyExist")

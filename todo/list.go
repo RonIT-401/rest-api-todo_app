@@ -20,7 +20,7 @@ func (l *List) AddTask(task Task) error {
 	defer l.mtx.Unlock()
 
 	_, ok := l.tasks[task.Title]
-	if !ok {
+	if ok {
 		return ErrTaskAlreadyExist
 	}
 
@@ -56,43 +56,43 @@ func (l *List) ListTasks() map[string]Task {
 }
 
 // Метод завершения задачи с проверкой на существования этой задачи
-func (l *List) CompleteTask(title string) error {
+func (l *List) CompleteTask(title string) (Task, error) {
 	l.mtx.Lock()
 	defer l.mtx.Unlock()
 
 	task, ok := l.tasks[title]
 	if !ok {
-		return ErrTaskNotFound
+		return Task{}, ErrTaskNotFound
 	}
 
 	task.Done()
 
 	l.tasks[title] = task
 
-	return nil
+	return l.tasks[title], nil
 }
 
-func (l *List) UncomleteTask(title string) error {
+func (l *List) UncomleteTask(title string) (Task, error) {
 	l.mtx.Lock()
 	defer l.mtx.Unlock()
-	
+
 	task, ok := l.tasks[title]
 	if !ok {
-		return ErrTaskNotFound
+		return Task{}, ErrTaskNotFound
 	}
 
 	task.Uncomlete()
 
 	l.tasks[title] = task
 
-	return nil
+	return l.tasks[title], nil
 }
 
 // Метод отображения не завершенных задач
 func (l *List) ListUncomletedTasks() map[string]Task {
 	l.mtx.RLock()
 	defer l.mtx.RUnlock()
-	
+
 	uncompletedTask := make(map[string]Task)
 
 	for title, task := range l.tasks {
