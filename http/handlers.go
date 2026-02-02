@@ -158,29 +158,29 @@ func (h *HTTPHanlers) HandleCompleteTasks(w http.ResponseWriter, r *http.Request
 	}
 
 	if err != nil {
-			errDTO := ErrorDTO{
-				Message: err.Error(),
-				Time:    time.Now(),
-			}
-
-			if errors.Is(err, todo.ErrTaskNotFound) {
-				http.Error(w, errDTO.ToString(), http.StatusNotFound)
-			} else {
-				http.Error(w, errDTO.ToString(), http.StatusInternalServerError)
-			}
-
-			return
+		errDTO := ErrorDTO{
+			Message: err.Error(),
+			Time:    time.Now(),
 		}
 
-		b, err := json.MarshalIndent(changedTask, "", "    ")
-		if err != nil {
-			panic(err)
+		if errors.Is(err, todo.ErrTaskNotFound) {
+			http.Error(w, errDTO.ToString(), http.StatusNotFound)
+		} else {
+			http.Error(w, errDTO.ToString(), http.StatusInternalServerError)
 		}
 
-		if _, err := w.Write(b); err != nil {
-			fmt.Println("failed to write response:", err)
-			return
-		}
+		return
+	}
+
+	b, err := json.MarshalIndent(changedTask, "", "    ")
+	if err != nil {
+		panic(err)
+	}
+
+	if _, err := w.Write(b); err != nil {
+		fmt.Println("failed to write response:", err)
+		return
+	}
 }
 
 func (h *HTTPHanlers) HandleDeleteTask(w http.ResponseWriter, r *http.Request) {
@@ -200,4 +200,6 @@ func (h *HTTPHanlers) HandleDeleteTask(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
