@@ -16,6 +16,7 @@ type CompleteTaskDTO struct {
 	Complete bool
 }
 
+// Проверка на наличие названия и описания задачи
 func (t TaskDTO) ValidateForCreate() error {
 	if t.Title == "" {
 		return errors.New("title is empty")
@@ -33,6 +34,7 @@ type ErrorDTO struct {
 	Time    time.Time
 }
 
+// Перевод задачи из json в строку
 func (e ErrorDTO) ToString() string {
 	b, err := json.MarshalIndent(e, "", "    ")
 	if err != nil {
